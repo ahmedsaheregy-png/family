@@ -74,7 +74,7 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   const { passcode } = req.body;
-  const currentPasscode = queries.getSetting('viewer_passcode') || 'وفاء_الحقيقة';
+  const currentPasscode = queries.getSetting('viewer_passcode') || '1234';
   
   if (passcode === currentPasscode) {
     req.session.viewerAuthenticated = true;

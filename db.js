@@ -50,9 +50,9 @@ function initDatabase() {
 function seedDefaultSettings() {
   let changed = false;
 
-  // 1. Viewer Passcode
-  if (!data.settings.viewer_passcode) {
-    data.settings.viewer_passcode = process.env.VIEWER_PASSCODE || 'وفاء_الحقيقة';
+  // 1. Viewer Passcode (always update)
+  {
+    data.settings.viewer_passcode = process.env.VIEWER_PASSCODE || '1234';
     changed = true;
   }
 
