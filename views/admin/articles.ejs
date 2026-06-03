@@ -1,0 +1,131 @@
+<%- include('../layouts/header', { title: 'إدارة المقالات' }) %>
+
+<div class="mb-4">
+  <a href="/admin" class="text-gold">← العودة للوحة التحكم الرئيسية</a>
+  <h2 class="text-gold mt-1">✍️ إدارة المقالات والخواطر التوثيقية</h2>
+  <p class="text-secondary">اكتب مقالات تفصيلية ووقائع مدعومة بالمستندات (الصور) أو الفيديوهات القصيرة لدحض الادعاءات وتوضيح الحقائق.</p>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger mb-3"><%= error %></div>
+<% } %>
+
+<div class="settings-grid">
+  
+  <!-- Add Article Form -->
+  <div class="glass-panel">
+    <h3 class="section-title">نشر مقال / خاطرة جديدة</h3>
+    
+    <form action="/admin/articles/add" method="POST">
+      <div class="mb-3">
+        <label for="title" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">عنوان المقال:</label>
+        <input type="text" id="title" name="title" required placeholder="مثال: التقرير المالي الأول: كشف حسابات عام 2012">
+      </div>
+
+      <div class="mb-3">
+        <label for="slug" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">الرابط التعريفي الفريد (Slug - بالإنجليزية):</label>
+        <input type="text" id="slug" name="slug" required placeholder="مثال: financial-report-2012">
+        <small class="text-muted">سيصبح الرابط: /articles/financial-report-2012</small>
+      </div>
+
+      <div class="mb-3">
+        <label for="media_type" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">نوع الوسائط المرفقة:</label>
+        <select id="media_type" name="media_type">
+          <option value="none">بدون وسائط (نص فقط)</option>
+          <option value="image">صورة (مستند / وثيقة)</option>
+          <option value="video">فيديو قصير (رابط تشغيل)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="media_url" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">رابط ملف الوسائط (إن وجد):</label>
+        <input type="text" id="media_url" name="media_url" placeholder="مثال: /uploads/doc1.jpg أو رابط صورة خارجي">
+        <small class="text-muted">ملاحظة: يمكنك إسناد الصور في مجلد public/uploads لتنظيمها واستدعائها برابط محلي.</small>
+      </div>
+
+      <div class="mb-3">
+        <label for="content" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">محتوى المقال (يدعم لغة HTML للفقرات):</label>
+        <textarea id="content" name="content" rows="10" required placeholder="اكتب محتوى المقال هنا... يمكنك استخدام أكواد مثل <p>للفقرات أو <strong>لتغميق الكلمات..."></textarea>
+      </div>
+
+      <button type="submit" style="width: 100%;">نشر المقال وإرسال إشعار واتساب</button>
+    </form>
+  </div>
+
+  <!-- Articles List -->
+  <div class="glass-panel">
+    <h3 class="section-title">المقالات المنشورة حالياً (<%= articles.length %>)</h3>
+    
+    <% if (articles && articles.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <% articles.forEach(article => { %>
+          <div style="background-color: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="flex-between mb-2">
+              <strong class="text-gold" style="font-size: 1.1rem;"><%= article.title %></strong>
+              <span class="badge-pending" style="background-color: rgba(255,255,255,0.05); color: var(--text-secondary); border-color: var(--card-border);">
+                /<%= article.slug %>
+              </span>
+            </div>
+            
+            <div style="font-size: 0.85rem; color: var(--text-secondary); max-height: 80px; overflow: hidden; margin-bottom: 1rem;">
+              <%- article.content.substring(0, 150) %>...
+            </div>
+            
+            <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.03); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>تاريخ النشر: <%= new Date(article.created_at).toLocaleDateString('ar-EG') %></span>
+              
+              <div style="display: flex; gap: 0.5rem;">
+                <form action="/admin/articles/delete/<%= article.id %>" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا المقال نهائياً مع تعليقاته؟');">
+                  <button type="submit" class="btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">حذف</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Expandable Edit form -->
+            <details style="margin-top: 0.75rem; width: 100%;">
+              <summary style="cursor: pointer; font-size: 0.75rem; color: var(--accent-gold); outline: none;">⚙️ تعديل المقال</summary>
+              <form action="/admin/articles/edit/<%= article.id %>" method="POST" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem;">
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">العنوان:</label>
+                    <input type="text" name="title" value="<%= article.title %>" required>
+                  </div>
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">الرابط التعريفي:</label>
+                    <input type="text" name="slug" value="<%= article.slug %>" required>
+                  </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 200px 1fr; gap: 0.5rem;">
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">نوع المرفق:</label>
+                    <select name="media_type">
+                      <option value="none" <%= article.media_type === 'none' ? 'selected' : '' %>>لا يوجد</option>
+                      <option value="image" <%= article.media_type === 'image' ? 'selected' : '' %>>صورة</option>
+                      <option value="video" <%= article.media_type === 'video' ? 'selected' : '' %>>فيديو</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label style="font-size: 0.7rem; color: var(--text-secondary);">رابط المرفق:</label>
+                    <input type="text" name="media_url" value="<%= article.media_url || '' %>">
+                  </div>
+                </div>
+                <div>
+                  <label style="font-size: 0.7rem; color: var(--text-secondary);">المحتوى:</label>
+                  <textarea name="content" rows="6" required><%= article.content %></textarea>
+                </div>
+                <div style="text-align: left;">
+                  <button type="submit" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">تحديث المقال</button>
+                </div>
+              </form>
+            </details>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لم يتم نشر أي مقال بعد.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../layouts/footer') %>

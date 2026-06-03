@@ -1,0 +1,95 @@
+<%- include('../layouts/header', { title: 'مراجعة التعليقات' }) %>
+
+<div class="mb-4">
+  <a href="/admin" class="text-gold">← العودة للوحة التحكم الرئيسية</a>
+  <h2 class="text-gold mt-1">💬 الإشراف والتحكم بالتعليقات والشهادات</h2>
+  <p class="text-secondary">راجع التعليقات المكتوبة من أفراد العائلة، وقم باعتمادها لتصبح ظاهرة للعامة، أو احذفها بشكل نهائي وفوري.</p>
+</div>
+
+<div class="settings-grid" style="grid-template-columns: 1fr;">
+  
+  <!-- 1. PENDING COMMENTS -->
+  <div class="glass-panel" style="border-color: rgba(239, 68, 68, 0.3);">
+    <h3 class="section-title" style="color: var(--danger);">تعليقات في انتظار المراجعة والاعتماد (<%= pendingComments.length %>)</h3>
+    
+    <% if (pendingComments && pendingComments.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <% pendingComments.forEach(comment => { %>
+          <div style="background-color: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); padding: 1.25rem; border-radius: 8px;">
+            <div class="flex-between mb-2">
+              <div>
+                <strong style="color: var(--accent-gold); font-size: 1.05rem;"><%= comment.author_name %></strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+                  على <%= comment.target_type === 'video' ? 'فيديو' : 'مقال' %>: 
+                  <strong>"<%= contentMap[comment.target_type][comment.target_id] || 'محتوى محذوف' %>"</strong>
+                </span>
+              </div>
+              <span class="badge-pending">بانتظار الموافقة</span>
+            </div>
+            
+            <p style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 1rem;"><%= comment.comment_text %></p>
+            
+            <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.03); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>تاريخ الإرسال: <%= new Date(comment.created_at).toLocaleDateString('ar-EG') %> - <%= new Date(comment.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) %></span>
+              
+              <div style="display: flex; gap: 0.75rem;">
+                <!-- Approve form -->
+                <form action="/admin/comments/approve/<%= comment.id %>" method="POST">
+                  <button type="submit" style="background-color: var(--success); color: var(--text-primary); padding: 0.35rem 0.8rem; font-size: 0.8rem;">اعتماد وموافقة</button>
+                </form>
+                <!-- Delete form -->
+                <form action="/admin/comments/delete/<%= comment.id %>" method="POST" onsubmit="return confirm('هل تريد رفض وحذف هذا التعليق نهائياً؟');">
+                  <button type="submit" class="btn-danger" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;">حذف ورفض</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لا توجد تعليقات معلقة في انتظار المراجعة حالياً.</p>
+    <% } %>
+  </div>
+
+  <!-- 2. APPROVED COMMENTS -->
+  <div class="glass-panel" style="border-color: rgba(16, 185, 129, 0.3);">
+    <h3 class="section-title" style="color: var(--success);">التعليقات المعتمدة الحالية والظاهرة للمشاهدين (<%= approvedComments.length %>)</h3>
+    
+    <% if (approvedComments && approvedComments.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+        <% approvedComments.forEach(comment => { %>
+          <div style="background-color: rgba(16, 185, 129, 0.03); border: 1px solid rgba(16, 185, 129, 0.15); padding: 1.25rem; border-radius: 8px;">
+            <div class="flex-between mb-2">
+              <div>
+                <strong style="color: var(--accent-gold); font-size: 1.05rem;"><%= comment.author_name %></strong>
+                <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">
+                  على <%= comment.target_type === 'video' ? 'فيديو' : 'مقال' %>: 
+                  <strong>"<%= contentMap[comment.target_type][comment.target_id] || 'محتوى محذوف' %>"</strong>
+                </span>
+              </div>
+              <span class="badge-pending" style="background-color: rgba(16, 185, 129, 0.1); color: var(--success); border-color: rgba(16, 185, 129, 0.3);">نشط وظاهر</span>
+            </div>
+            
+            <p style="font-size: 0.95rem; color: var(--text-primary); margin-bottom: 1rem;"><%= comment.comment_text %></p>
+            
+            <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.03); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>تاريخ التوثيق: <%= new Date(comment.created_at).toLocaleDateString('ar-EG') %> - <%= new Date(comment.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) %></span>
+              
+              <div>
+                <!-- Delete form -->
+                <form action="/admin/comments/delete/<%= comment.id %>" method="POST" onsubmit="return confirm('هل تريد إزالة وحذف هذا التعليق نهائياً؟');">
+                  <button type="submit" class="btn-danger" style="padding: 0.35rem 0.8rem; font-size: 0.8rem;">حذف فوري</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لا توجد تعليقات معتمدة حالياً.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../layouts/header') %>

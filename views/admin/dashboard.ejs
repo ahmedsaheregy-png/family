@@ -1,0 +1,80 @@
+<%- include('../layouts/header', { title: 'لوحة التحكم للمشرف' }) %>
+
+<div class="mb-4 flex-between">
+  <div>
+    <h2 class="text-gold">لوحة التحكم الإدارية للمشرف</h2>
+    <p class="text-secondary">مرحباً بك في لوحة الإدارة. يمكنك من هنا إضافة وتعديل الفيديوهات، المقالات، الآراء، والتحكم بالتعليقات وإرسال إشعارات الواتساب.</p>
+  </div>
+  <a href="/" class="btn btn-secondary">← العودة للموقع العام</a>
+</div>
+
+<!-- Quick Statistics Grid -->
+<div class="video-grid" style="grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); margin-bottom: 2.5rem;">
+  <div class="glass-panel text-center" style="margin-bottom: 0; padding: 1.5rem;">
+    <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-gold);"><%= stats.videoCount %></div>
+    <div class="text-secondary" style="font-weight: 600;">الفيديوهات الأساسية</div>
+  </div>
+  
+  <div class="glass-panel text-center" style="margin-bottom: 0; padding: 1.5rem;">
+    <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-gold);"><%= stats.judgmentCount %></div>
+    <div class="text-secondary" style="font-weight: 600;">الحكم والآراء</div>
+  </div>
+
+  <div class="glass-panel text-center" style="margin-bottom: 0; padding: 1.5rem;">
+    <div style="font-size: 2.5rem; font-weight: 700; color: var(--accent-gold);"><%= stats.articleCount %></div>
+    <div class="text-secondary" style="font-weight: 600;">الخواطر والمقالات</div>
+  </div>
+
+  <div class="glass-panel text-center" style="margin-bottom: 0; padding: 1.5rem; border-color: <%= stats.pendingCommentsCount > 0 ? 'var(--danger)' : 'var(--card-border)' %>;">
+    <div style="font-size: 2.5rem; font-weight: 700; color: <%= stats.pendingCommentsCount > 0 ? 'var(--danger)' : 'var(--success)' %>;"><%= stats.pendingCommentsCount %></div>
+    <div class="text-secondary" style="font-weight: 600;">تعليقات في انتظار المراجعة</div>
+  </div>
+</div>
+
+<!-- Shortcuts Grid -->
+<h3 class="section-title">إدارة المحتوى والإعدادات</h3>
+<div class="video-grid" style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));">
+  
+  <!-- 1. Videos Card -->
+  <div class="glass-panel" style="margin-bottom: 0; display: flex; flex-direction: column;">
+    <h4 class="text-gold mb-2">🎥 إدارة الفيديوهات الرئيسية</h4>
+    <p class="text-secondary mb-3" style="flex: 1;">إضافة فيديوهات الوقائع، وتعديل روابطها ومصادرها (YouTube، Drive، إلخ) مع الحفاظ على ثبات روابط الموقع العامة.</p>
+    <a href="/admin/videos" class="btn" style="width: 100%;">إدارة الفيديوهات</a>
+  </div>
+
+  <!-- 2. Judgments Card -->
+  <div class="glass-panel" style="margin-bottom: 0; display: flex; flex-direction: column;">
+    <h4 class="text-gold mb-2">⚖️ إدارة الآراء والشهادات</h4>
+    <p class="text-secondary mb-3" style="flex: 1;">إضافة وتوثيق الشهادات العائلية والآراء القانونية أو العرفية للعمومة والشيخوخة حول القضايا.</p>
+    <a href="/admin/judgments" class="btn" style="width: 100%;">إدارة الشهادات</a>
+  </div>
+
+  <!-- 3. Articles Card -->
+  <div class="glass-panel" style="margin-bottom: 0; display: flex; flex-direction: column;">
+    <h4 class="text-gold mb-2">✍️ إدارة المقالات والخواطر</h4>
+    <p class="text-secondary mb-3" style="flex: 1;">كتابة نصوص مفصلة وخواطر مدعمة بالصور ومقاطع الفيديو القصيرة لتفسير الوثائق والمستندات.</p>
+    <a href="/admin/articles" class="btn" style="width: 100%;">إدارة المقالات</a>
+  </div>
+
+  <!-- 4. Comment Moderation Card -->
+  <div class="glass-panel" style="margin-bottom: 0; display: flex; flex-direction: column; border-color: <%= stats.pendingCommentsCount > 0 ? 'rgba(239, 68, 68, 0.4)' : 'var(--card-border)' %>;">
+    <h4 class="text-gold mb-2">💬 الإشراف على التعليقات</h4>
+    <p class="text-secondary mb-3" style="flex: 1;">مراجعة جميع التعليقات والشهادات الواردة من أفراد الأسرة، والموافقة عليها لتظهر للجميع أو حذفها بشكل نهائي وفوري.</p>
+    <a href="/admin/comments" class="btn btn-secondary" style="width: 100%; border-color: var(--danger); color: var(--text-primary); background-color: <%= stats.pendingCommentsCount > 0 ? 'var(--danger-bg)' : 'transparent' %>;">
+      إدارة التعليقات 
+      <% if (stats.pendingCommentsCount > 0) { %>
+        <span class="badge-pending" style="margin-right: 0.5rem;"><%= stats.pendingCommentsCount %> جديد</span>
+      <% } %>
+    </a>
+  </div>
+
+  <!-- 5. Settings Card -->
+  <div class="glass-panel" style="margin-bottom: 0; display: flex; flex-direction: column;">
+    <h4 class="text-gold mb-2">⚙️ إعدادات المنصة وإشعارات واتساب</h4>
+    <p class="text-secondary mb-3" style="flex: 1;">تغيير رمز مرور المنصة العائلي، إعدادات حساب Twilio للواتساب، وإدارة أرقام هواتف أفراد العائلة لتلقي الإشعارات التلقائية.</p>
+    <a href="/admin/settings" class="btn" style="width: 100%;">الإعدادات والاتصال</a>
+  </div>
+
+</div>
+
+<%- include('../layouts/footer') %>

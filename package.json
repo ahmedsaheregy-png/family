@@ -1,0 +1,18 @@
+{
+  "name": "family-archive",
+  "version": "1.0.0",
+  "description": "Family Documenting Web Application",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^16.4.5",
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "express-session": "^1.18.0",
+    "twilio": "^5.1.0"
+  }
+}

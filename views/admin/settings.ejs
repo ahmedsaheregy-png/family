@@ -1,0 +1,141 @@
+<%- include('../layouts/header', { title: 'إعدادات المنصة' }) %>
+
+<div class="mb-4">
+  <a href="/admin" class="text-gold">← العودة للوحة التحكم الرئيسية</a>
+  <h2 class="text-gold mt-1">⚙️ إعدادات المنصة والاتصال بالواتساب</h2>
+  <p class="text-secondary">تحكم برمز مرور المنصة، وهيئ حساب إشعارات واتساب لإعلام أفراد العائلة تلقائياً بالمستجدات فور نشرها.</p>
+</div>
+
+<!-- Messages from server -->
+<% if (successMsg) { %>
+  <div class="alert alert-success"><%= successMsg %></div>
+<% } %>
+<% if (errorMsg) { %>
+  <div class="alert alert-danger"><%= errorMsg %></div>
+<% } %>
+
+<!-- Check URL parameters for errors as well -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const err = urlParams.get('error');
+    if (err) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-danger mb-3';
+      alertDiv.innerText = err;
+      document.querySelector('main').insertBefore(alertDiv, document.querySelector('.settings-grid'));
+    }
+  });
+</script>
+
+<div class="settings-grid">
+  
+  <!-- LEFT COLUMN: ACCESS PASSCODE & TWILIO CONFIG -->
+  <div style="display: flex; flex-direction: column; gap: 2rem;">
+    
+    <!-- 1. PASSCODE SETTINGS -->
+    <div class="glass-panel" style="margin-bottom: 0;">
+      <h3 class="section-title">رمز مرور العائلة (Access Code)</h3>
+      <form action="/admin/settings/passcode" method="POST">
+        <div class="mb-3">
+          <label for="passcode" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">رمز المرور الموحد الحالي:</label>
+          <input type="text" id="passcode" name="passcode" value="<%= settings.viewerPasscode %>" required placeholder="مثال: وفاء_الحقيقة">
+          <small class="text-muted">هذا هو الرمز الذي يدخله أفراد العائلة للدخول للمنصة وقراءة الأحداث.</small>
+        </div>
+        <button type="submit">تحديث رمز المرور</button>
+      </form>
+    </div>
+
+    <!-- 2. TWILIO CONFIGURATION -->
+    <div class="glass-panel" style="margin-bottom: 0;">
+      <h3 class="section-title">إعدادات Twilio لإرسال إشعارات واتساب</h3>
+      <form action="/admin/settings/twilio" method="POST">
+        
+        <div class="mb-3" style="display: flex; align-items: center; gap: 0.5rem; background-color: rgba(255,255,255,0.02); padding: 0.75rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.04);">
+          <input type="checkbox" id="enable_whatsapp" name="enable_whatsapp" style="width: auto; cursor: pointer;" <%= settings.enableWa ? 'checked' : '' %>>
+          <label for="enable_whatsapp" style="cursor: pointer; font-size: 0.9rem; font-weight: 600;">تفعيل إرسال إشعارات الواتساب تلقائياً عند النشر</label>
+        </div>
+
+        <div class="mb-3">
+          <label for="twilio_sid" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">Account SID:</label>
+          <input type="text" id="twilio_sid" name="twilio_sid" value="<%= settings.twilioSid %>" placeholder="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx">
+        </div>
+
+        <div class="mb-3">
+          <label for="twilio_auth_token" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">Auth Token:</label>
+          <input type="password" id="twilio_auth_token" name="twilio_auth_token" value="<%= settings.twilioAuthToken %>" placeholder="أدخل رمز التوثيق">
+        </div>
+
+        <div class="mb-3">
+          <label for="twilio_from_number" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">رقم مرسل الواتساب (Twilio Number):</label>
+          <input type="text" id="twilio_from_number" name="twilio_from_number" value="<%= settings.twilioFromNumber %>" placeholder="whatsapp:+14155238886">
+          <small class="text-muted">الرقم المخصص للبث بصيغة: whatsapp:+14155238886 (يمكنك استخدام رقم التجربة Sandbox أولاً للتجريب)</small>
+        </div>
+
+        <button type="submit" class="btn-secondary" style="width: 100%;">حفظ إعدادات واتساب</button>
+      </form>
+    </div>
+
+  </div>
+
+  <!-- RIGHT COLUMN: WHATSAPP SUBSCRIBERS LIST -->
+  <div class="glass-panel" style="margin-bottom: 0;">
+    <h3 class="section-title">أرقام هواتف مستقبلي الإشعارات</h3>
+    
+    <!-- Add Contact Form -->
+    <div style="background-color: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); margin-bottom: 1.5rem;">
+      <h4 class="mb-2" style="font-size: 0.95rem; color: var(--accent-gold);">إضافة مستلم جديد:</h4>
+      <form action="/admin/settings/contacts/add" method="POST" style="display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 0.75rem;">
+          <div>
+            <label style="font-size: 0.75rem; color: var(--text-secondary);">اسم المستلم:</label>
+            <input type="text" name="name" required placeholder="مثال: العم أبو محمد">
+          </div>
+          <div>
+            <label style="font-size: 0.75rem; color: var(--text-secondary);">رقم الهاتف (مع مفتاح الدولة):</label>
+            <input type="text" name="phone_number" required placeholder="مثال: +966500000000">
+          </div>
+        </div>
+        <div style="text-align: left;">
+          <button type="submit" style="padding: 0.4rem 1.2rem; font-size: 0.85rem;">إضافة رقم المستلم</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Contacts Table -->
+    <h4 class="mb-2" style="font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 0.3rem;">قائمة الأرقام المسجلة (<%= contacts.length %>)</h4>
+    <% if (contacts && contacts.length > 0) { %>
+      <div style="overflow-x: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>الاسم</th>
+              <th>رقم الهاتف</th>
+              <th>تاريخ الإضافة</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% contacts.forEach(contact => { %>
+              <tr>
+                <td><strong><%= contact.name %></strong></td>
+                <td dir="ltr" style="text-align: right;"><%= contact.phone_number %></td>
+                <td><%= new Date(contact.created_at).toLocaleDateString('ar-EG') %></td>
+                <td>
+                  <form action="/admin/settings/contacts/delete/<%= contact.id %>" method="POST" onsubmit="return confirm('هل تريد حذف هذا المستلم نهائياً؟ لن يستقبل إشعارات بعد الآن.');">
+                    <button type="submit" class="btn-danger" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">حذف</button>
+                  </form>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لم يتم إضافة أي أرقام هواتف لتلقي الإشعارات حتى الآن.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../layouts/footer') %>

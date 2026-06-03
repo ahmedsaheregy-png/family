@@ -1,0 +1,34 @@
+<%- include('layouts/header', { title: 'دخول الإدارة' }) %>
+
+<div class="login-wrapper" style="min-height: auto; margin-top: 2rem; margin-bottom: 2rem;">
+  <div class="login-card" style="border-color: #ff5c5c;">
+    <div class="login-title-h1" style="color: #ff5c5c;">بوابة الإدارة</div>
+    <div class="login-subtitle">يرجى تسجيل الدخول للوصول إلى لوحة التحكم والتعديل</div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger mb-3">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/admin/login" method="POST">
+      <div class="mb-3">
+        <label for="username" class="text-secondary mb-1" style="display: block; font-weight: 600;">اسم المستخدم:</label>
+        <input type="text" id="username" name="username" required placeholder="admin" autofocus>
+      </div>
+
+      <div class="mb-4">
+        <label for="password" class="text-secondary mb-1" style="display: block; font-weight: 600;">كلمة المرور:</label>
+        <input type="password" id="password" name="password" required placeholder="••••••••">
+      </div>
+
+      <button type="submit" class="btn-danger" style="width: 100%;">تسجيل دخول المسؤول</button>
+    </form>
+    
+    <div style="margin-top: 1.5rem; text-align: center;">
+      <a href="/" style="font-size: 0.85rem;">← العودة للموقع الرئيسي</a>
+    </div>
+  </div>
+</div>
+
+<%- include('layouts/footer') %>

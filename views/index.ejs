@@ -1,0 +1,120 @@
+<%- include('layouts/header', { title: 'الرئيسية' }) %>
+
+<!-- Header Banner Welcome -->
+<div class="glass-panel text-center mb-4">
+  <h2 class="text-gold mb-2">أرشيف الأحداث والوقائع العائلية الخاص</h2>
+  <p class="text-secondary" style="max-width: 800px; margin: 0 auto;">
+    هذا الموقع مخصص لحفظ وتوثيق كافة الوقائع والأحداث التي جرت في العائلة خلال العشرين سنة الماضية، مع الملفات والفيديوهات والأدلة والشهادات بطريقة منظمة وأمينة.
+  </p>
+</div>
+
+<!-- SECTION 1: MAIN VIDEOS -->
+<section class="mb-4">
+  <div class="flex-between mb-3">
+    <h2 class="section-title">الفيديوهات التوضيحية الرئيسية</h2>
+    <% if (session && session.adminAuthenticated) { %>
+      <a href="/admin/videos" class="btn btn-secondary btn-sm" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">+ تعديل الفيديوهات</a>
+    <% } %>
+  </div>
+
+  <% if (videos && videos.length > 0) { %>
+    <div class="video-grid">
+      <% videos.forEach(video => { %>
+        <div class="video-card">
+          <a href="/videos/<%= video.slug %>">
+            <div class="video-thumbnail-placeholder">
+              <span class="play-icon">▶</span>
+            </div>
+          </a>
+          <div class="video-card-body">
+            <h3 class="video-card-title"><%= video.title %></h3>
+            <p class="video-card-desc"><%= video.description %></p>
+            <div class="video-card-footer">
+              <span class="video-card-date">تم النشر: <%= new Date(video.created_at).toLocaleDateString('ar-EG') %></span>
+              <a href="/videos/<%= video.slug %>" class="text-gold" style="font-weight: 600;">مشاهدة الفيديو ←</a>
+            </div>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="glass-panel text-center py-4">
+      <p class="text-secondary">لا توجد فيديوهات مضافة حالياً.</p>
+    </div>
+  <% } %>
+</section>
+
+<!-- SECTION 2: JUDGMENTS & OPINIONS -->
+<section class="mb-4">
+  <div class="flex-between mb-3">
+    <h2 class="section-title">الحكم والآراء والشهادات العائلية</h2>
+    <% if (session && session.adminAuthenticated) { %>
+      <a href="/admin/judgments" class="btn btn-secondary btn-sm" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">+ تعديل الشهادات</a>
+    <% } %>
+  </div>
+
+  <% if (judgments && judgments.length > 0) { %>
+    <div class="judgment-timeline mb-4">
+      <% judgments.forEach(judgment => { %>
+        <div class="judgment-card">
+          <div class="judgment-header">
+            <div class="judgment-title"><%= judgment.title %></div>
+            <div class="judgment-author"><%= judgment.person_name %></div>
+          </div>
+          <div class="judgment-text">
+            "<%= judgment.opinion_text %>"
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.75rem;">
+            تاريخ التوثيق: <%= new Date(judgment.created_at).toLocaleDateString('ar-EG') %>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="glass-panel text-center py-4">
+      <p class="text-secondary">لا توجد شهادات أو آراء موثقة حالياً.</p>
+    </div>
+  <% } %>
+</section>
+
+<!-- SECTION 3: THOUGHTS & ARTICLES -->
+<section class="mb-4">
+  <div class="flex-between mb-3">
+    <h2 class="section-title">الخواطر والمقالات التوثيقية</h2>
+    <% if (session && session.adminAuthenticated) { %>
+      <a href="/admin/articles" class="btn btn-secondary btn-sm" style="font-size: 0.85rem; padding: 0.4rem 0.8rem;">+ تعديل المقالات</a>
+    <% } %>
+  </div>
+
+  <% if (articles && articles.length > 0) { %>
+    <div class="article-list">
+      <% articles.forEach(article => { %>
+        <div class="article-row">
+          <div class="article-row-content">
+            <h3 class="article-row-title">
+              <a href="/articles/<%= article.slug %>"><%= article.title %></a>
+            </h3>
+            <div class="article-row-preview">
+              <%- article.content.substring(0, 180).replace(/<[^>]*>/g, '') %>...
+            </div>
+            <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.5rem;">
+              تاريخ الكتابة: <%= new Date(article.created_at).toLocaleDateString('ar-EG') %>
+              <% if (article.media_type !== 'none') { %>
+                • يحتوي على وسائط (<%= article.media_type === 'image' ? 'صورة' : 'فيديو قصير' %>)
+              <% } %>
+            </div>
+          </div>
+          <div>
+            <a href="/articles/<%= article.slug %>" class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.9rem;">قراءة المقال كاملًا ←</a>
+          </div>
+        </div>
+      <% }) %>
+    </div>
+  <% } else { %>
+    <div class="glass-panel text-center py-4">
+      <p class="text-secondary">لا توجد مقالات أو خواطر منشورة حالياً.</p>
+    </div>
+  <% } %>
+</section>
+
+<%- include('layouts/footer') %>

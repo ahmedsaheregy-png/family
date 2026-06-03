@@ -1,0 +1,97 @@
+<%- include('../layouts/header', { title: 'إدارة الشهادات والأحكام' }) %>
+
+<div class="mb-4">
+  <a href="/admin" class="text-gold">← العودة للوحة التحكم الرئيسية</a>
+  <h2 class="text-gold mt-1">⚖️ إدارة الآراء والشهادات العائلية</h2>
+  <p class="text-secondary">وثّق شهادات كبار العائلة أو الأحكام والاتفاقات القانونية والعرفية التي تخص قضايا الأسرة.</p>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger mb-3"><%= error %></div>
+<% } %>
+
+<div class="settings-grid">
+  
+  <!-- Add Form -->
+  <div class="glass-panel">
+    <h3 class="section-title">إضافة شهادة / رأي جديد</h3>
+    
+    <form action="/admin/judgments/add" method="POST">
+      <div class="mb-3">
+        <label for="title" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">موضوع الشهادة / الحكم:</label>
+        <input type="text" id="title" name="title" required placeholder="مثال: حكم العم الأكبر بخصوص الأوراق المالية">
+      </div>
+
+      <div class="mb-3">
+        <label for="person_name" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">اسم صاحب الشهادة / الرأي:</label>
+        <input type="text" id="person_name" name="person_name" required placeholder="مثال: الشيخ أبو فهد">
+      </div>
+
+      <div class="mb-3">
+        <label for="opinion_text" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">نص الشهادة بالتفصيل:</label>
+        <textarea id="opinion_text" name="opinion_text" rows="6" required placeholder="اكتب الرأي أو نص الشهادة العرفية أو تفاصيل الاتفاق هنا..."></textarea>
+      </div>
+
+      <button type="submit" style="width: 100%;">نشر التوثيق وإرسال إشعار واتساب</button>
+    </form>
+  </div>
+
+  <!-- Judgments List -->
+  <div class="glass-panel">
+    <h3 class="section-title">الشهادات الموثقة حالياً (<%= judgments.length %>)</h3>
+    
+    <% if (judgments && judgments.length > 0) { %>
+      <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+        <% judgments.forEach(judgment => { %>
+          <div style="background-color: rgba(255,255,255,0.02); padding: 1.25rem; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+            <div class="flex-between mb-2">
+              <strong class="text-gold" style="font-size: 1.1rem;"><%= judgment.title %></strong>
+              <span class="badge-pending" style="background-color: rgba(255,255,255,0.05); color: var(--text-secondary); border-color: var(--card-border);">
+                <%= judgment.person_name %>
+              </span>
+            </div>
+            
+            <p style="font-size: 0.9rem; color: var(--text-secondary); white-space: pre-line; margin-bottom: 1rem;"><%= judgment.opinion_text %></p>
+            
+            <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.03); padding-top: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+              <span>تاريخ التوثيق: <%= new Date(judgment.created_at).toLocaleDateString('ar-EG') %></span>
+              
+              <div style="display: flex; gap: 0.5rem;">
+                <form action="/admin/judgments/delete/<%= judgment.id %>" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذه الشهادة نهائياً؟');">
+                  <button type="submit" class="btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">حذف</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Expandable Edit form -->
+            <details style="margin-top: 0.75rem; width: 100%;">
+              <summary style="cursor: pointer; font-size: 0.75rem; color: var(--accent-gold); outline: none;">⚙️ تعديل شهادة / رأي</summary>
+              <form action="/admin/judgments/edit/<%= judgment.id %>" method="POST" style="margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.5rem;">
+                <div>
+                  <label style="font-size: 0.7rem; color: var(--text-secondary);">الموضوع:</label>
+                  <input type="text" name="title" value="<%= judgment.title %>" required>
+                </div>
+                <div>
+                  <label style="font-size: 0.7rem; color: var(--text-secondary);">الاسم:</label>
+                  <input type="text" name="person_name" value="<%= judgment.person_name %>" required>
+                </div>
+                <div>
+                  <label style="font-size: 0.7rem; color: var(--text-secondary);">النص:</label>
+                  <textarea name="opinion_text" rows="4" required><%= judgment.opinion_text %></textarea>
+                </div>
+                <div style="text-align: left;">
+                  <button type="submit" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;">تحديث البيانات</button>
+                </div>
+              </form>
+            </details>
+          </div>
+        <% }) %>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لم يتم توثيق أي شهادة أو حكم بعد.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../layouts/footer') %>

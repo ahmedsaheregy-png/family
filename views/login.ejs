@@ -1,0 +1,29 @@
+<%- include('layouts/header', { title: 'تسجيل الدخول' }) %>
+
+<div class="login-wrapper" style="min-height: auto; margin-top: 2rem; margin-bottom: 2rem;">
+  <div class="login-card">
+    <div class="login-title-h1">دخول الأعضاء</div>
+    <div class="login-subtitle">يرجى إدخال رمز المرور العائلي لمشاهدة الأحداث والوثائق</div>
+
+    <% if (error) { %>
+      <div class="alert alert-danger mb-3">
+        <%= error %>
+      </div>
+    <% } %>
+
+    <form action="/login" method="POST">
+      <div class="mb-4">
+        <label for="passcode" class="text-secondary mb-1" style="display: block; font-weight: 600;">رمز المرور الخاص:</label>
+        <input type="password" id="passcode" name="passcode" required placeholder="أدخل الرمز هنا" autofocus>
+      </div>
+
+      <button type="submit" style="width: 100%;">فتح المنصة</button>
+    </form>
+    
+    <div style="margin-top: 1.5rem; font-size: 0.8rem; color: var(--text-muted);">
+      إن لم يكن لديك الرمز، يرجى التواصل مع المشرف العائلي.
+    </div>
+  </div>
+</div>
+
+<%- include('layouts/footer') %>

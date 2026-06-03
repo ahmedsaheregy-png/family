@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title + ' | ' : '' %><%= appBranding.title %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- Disclaimer Banner -->
+  <div class="disclaimer-bar">
+    ⚠️ <%= appBranding.disclaimer %>
+  </div>
+
+  <!-- Header Section -->
+  <header>
+    <div class="header-container">
+      <div class="branding-group">
+        <a href="/">
+          <h1><%= appBranding.title %></h1>
+        </a>
+        <p><%= appBranding.subtitle %></p>
+      </div>
+
+      <nav>
+        <% if (session && session.viewerAuthenticated) { %>
+          <a href="/" class="nav-link">الرئيسية</a>
+          
+          <% if (session.adminAuthenticated) { %>
+            <a href="/admin" class="nav-link active">لوحة التحكم</a>
+            <a href="/admin/logout" class="nav-link" style="color: var(--danger);">خروج الإدارة</a>
+          <% } else { %>
+            <a href="/logout" class="nav-link" style="color: var(--danger);">تسجيل الخروج</a>
+          <% } %>
+        <% } else { %>
+          <a href="/login" class="nav-link">دخول الأعضاء</a>
+        <% } %>
+      </nav>
+    </div>
+  </header>
+
+  <main>

@@ -1,0 +1,124 @@
+<%- include('layouts/header', { title: video.title }) %>
+
+<div style="margin-bottom: 1.5rem;">
+  <a href="/" class="text-gold" style="font-weight: 600;">← العودة إلى الأرشيف الرئيسي</a>
+</div>
+
+<div class="glass-panel">
+  <h2 class="text-gold mb-1"><%= video.title %></h2>
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">
+    تاريخ النشر: <%= new Date(video.created_at).toLocaleDateString('ar-EG') %>
+  </div>
+
+  <!-- Secure Video Player Wrapper -->
+  <div class="video-player-wrapper">
+    <!-- Transparent Overlay Shield (Blocks right-click and context actions) -->
+    <div class="video-protection-overlay full-overlay" id="player-shield"></div>
+
+    <% if (video.source_type === 'youtube') { %>
+      <!-- YouTube Embed with restricted parameters -->
+      <iframe src="<%= video.source_url %>?rel=0&modestbranding=1&controls=1&fs=0&disablekb=1" 
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+              allowfullscreen="false"></iframe>
+
+    <% } else if (video.source_type === 'googledrive') { %>
+      <!-- Google Drive Embed -->
+      <iframe src="<%= video.source_url %>" allow="autoplay"></iframe>
+
+    <% } else { %>
+      <!-- HTML5 Native secure player (For local files, Cloudflare Stream, or GCS Signed URLs) -->
+      <video id="secure-html5-player" 
+             controls 
+             controlsList="nodownload nofullscreen" 
+             disablepictureinpicture 
+             oncontextmenu="return false;">
+        <source src="<%= video.source_url %>" type="video/mp4">
+        متصفحك لا يدعم تشغيل هذا الفيديو.
+      </video>
+    <% } %>
+  </div>
+
+  <div class="video-description-box" style="white-space: pre-line; line-height: 1.7; color: var(--text-primary);">
+    <%= video.description %>
+  </div>
+</div>
+
+<!-- COMMENTS SECTION -->
+<div class="glass-panel comments-section">
+  <h3 class="text-gold mb-3">المناقشات والتعليقات العائلية</h3>
+
+  <!-- Display feedback messages -->
+  <% if (successMsg) { %>
+    <div class="alert alert-success"><%= successMsg %></div>
+  <% } %>
+  <% if (errMsg) { %>
+    <div class="alert alert-danger"><%= errMsg %></div>
+  <% } %>
+
+  <!-- Add Comment Form -->
+  <div class="comment-form">
+    <h4 class="mb-2" style="font-size: 1.05rem;">أضف تعليقًا أو شهادة جديدة:</h4>
+    <form action="/videos/<%= video.slug %>/comments" method="POST">
+      <div class="comment-form-grid">
+        <div>
+          <label for="author_name" class="text-secondary mb-1" style="display: block; font-size: 0.85rem;">الاسم الكريم:</label>
+          <input type="text" id="author_name" name="author_name" required placeholder="مثال: أبو محمد">
+        </div>
+        <div>
+          <label for="comment_text" class="text-secondary mb-1" style="display: block; font-size: 0.85rem;">نص التعليق:</label>
+          <textarea id="comment_text" name="comment_text" rows="3" required placeholder="اكتب تعليقك أو معلوماتك هنا بكل أمانة..."></textarea>
+        </div>
+      </div>
+      <div style="text-align: left;">
+        <button type="submit">إرسال التعليق للمراجعة</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Comments List -->
+  <div class="comments-list">
+    <h4 class="mb-2" style="font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+      التعليقات المعتمدة والموثقة (<%= comments.length %>)
+    </h4>
+    
+    <% if (comments && comments.length > 0) { %>
+      <% comments.forEach(comment => { %>
+        <div class="comment-item">
+          <div class="comment-meta">
+            <span class="comment-author">✍️ <%= comment.author_name %></span>
+            <span><%= new Date(comment.created_at).toLocaleDateString('ar-EG') %> - <%= new Date(comment.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) %></span>
+          </div>
+          <div class="comment-text">
+            <%= comment.comment_text %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-muted text-center py-3">لا توجد تعليقات معتمدة حالياً. كن أول من يضيف تعليقًا.</p>
+    <% } %>
+  </div>
+</div>
+
+<!-- Extra JS shield specifically to secure embedded players -->
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const shield = document.getElementById('player-shield');
+    if (shield) {
+      // Prevent clicking or right-clicking on iframe elements
+      shield.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+      });
+    }
+
+    // Attempt to block keyboard commands on custom HTML5 players
+    const nativePlayer = document.getElementById('secure-html5-player');
+    if (nativePlayer) {
+      nativePlayer.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+      });
+    }
+  });
+</script>
+
+<%- include('layouts/footer') %>

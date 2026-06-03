@@ -1,0 +1,95 @@
+<%- include('layouts/header', { title: article.title }) %>
+
+<div style="margin-bottom: 1.5rem;">
+  <a href="/" class="text-gold" style="font-weight: 600;">← العودة إلى الأرشيف الرئيسي</a>
+</div>
+
+<div class="glass-panel">
+  <h2 class="text-gold mb-1"><%= article.title %></h2>
+  <div style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 2rem;">
+    تاريخ النشر: <%= new Date(article.created_at).toLocaleDateString('ar-EG') %>
+  </div>
+
+  <!-- Optional Media Support -->
+  <% if (article.media_type && article.media_type !== 'none' && article.media_url) { %>
+    <div class="article-media-container mb-3" style="max-width: 700px; margin: 0 auto 2rem; border-radius: 8px; overflow: hidden; border: 1px solid var(--card-border);">
+      <% if (article.media_type === 'image') { %>
+        <img src="<%= article.media_url %>" alt="<%= article.title %>" style="width: 100%; display: block; object-fit: cover;">
+      <% } else if (article.media_type === 'video') { %>
+        <div class="video-player-wrapper" style="margin-bottom: 0;">
+          <div class="video-protection-overlay full-overlay"></div>
+          <% if (article.media_url.includes('youtube.com') || article.media_url.includes('youtu.be')) { %>
+            <iframe src="<%= article.media_url %>?rel=0&modestbranding=1&controls=1&fs=0" allowfullscreen="false"></iframe>
+          <% } else { %>
+            <video controls controlsList="nodownload nofullscreen" disablepictureinpicture oncontextmenu="return false;">
+              <source src="<%= article.media_url %>" type="video/mp4">
+            </video>
+          <% } %>
+        </div>
+      <% } %>
+    </div>
+  <% } %>
+
+  <!-- Main content paragraphs -->
+  <div class="article-rich-content">
+    <%- article.content %>
+  </div>
+</div>
+
+<!-- COMMENTS SECTION -->
+<div class="glass-panel comments-section">
+  <h3 class="text-gold mb-3">التعليقات والشهادات المكتوبة</h3>
+
+  <!-- Display feedback messages -->
+  <% if (successMsg) { %>
+    <div class="alert alert-success"><%= successMsg %></div>
+  <% } %>
+  <% if (errMsg) { %>
+    <div class="alert alert-danger"><%= errMsg %></div>
+  <% } %>
+
+  <!-- Add Comment Form -->
+  <div class="comment-form">
+    <h4 class="mb-2" style="font-size: 1.05rem;">أضف رأيك أو شهادتك على هذا المقال:</h4>
+    <form action="/articles/<%= article.slug %>/comments" method="POST">
+      <div class="comment-form-grid">
+        <div>
+          <label for="author_name" class="text-secondary mb-1" style="display: block; font-size: 0.85rem;">الاسم الكريم:</label>
+          <input type="text" id="author_name" name="author_name" required placeholder="مثال: أبو فهد">
+        </div>
+        <div>
+          <label for="comment_text" class="text-secondary mb-1" style="display: block; font-size: 0.85rem;">التعليق:</label>
+          <textarea id="comment_text" name="comment_text" rows="3" required placeholder="اكتب تعليقك هنا بكل أمانة وموضوعية..."></textarea>
+        </div>
+      </div>
+      <div style="text-align: left;">
+        <button type="submit">إرسال التعليق للمراجعة</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Comments List -->
+  <div class="comments-list">
+    <h4 class="mb-2" style="font-size: 1.1rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 0.5rem;">
+      التعليقات المعتمدة والموثقة (<%= comments.length %>)
+    </h4>
+    
+    <% if (comments && comments.length > 0) { %>
+      <% comments.forEach(comment => { %>
+        <div class="comment-item">
+          <div class="comment-meta">
+            <span class="comment-author">✍️ <%= comment.author_name %></span>
+            <span><%= new Date(comment.created_at).toLocaleDateString('ar-EG') %> - <%= new Date(comment.created_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) %></span>
+          </div>
+          <div class="comment-text">
+            <%= comment.comment_text %>
+          </div>
+        </div>
+      <% }) %>
+    <% } else { %>
+      <p class="text-muted text-center py-3">لا توجد تعليقات معتمدة حالياً. كن أول من يضيف تعليقًا.</p>
+    <% } %>
+  </div>
+</div>
+
+<%- include('layouts/footer') %>

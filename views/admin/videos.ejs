@@ -1,0 +1,162 @@
+<%- include('../layouts/header', { title: 'إدارة الفيديوهات' }) %>
+
+<div class="mb-4">
+  <a href="/admin" class="text-gold">← العودة للوحة التحكم الرئيسية</a>
+  <h2 class="text-gold mt-1">🎥 إدارة الفيديوهات التوضيحية الرئيسية</h2>
+  <p class="text-secondary">أضف فيديوهات الوقائع أو حدث مصادرها وروابطها. روابط الفيديوهات الخارجية في قاعدة البيانات تظل ثابتة في الواجهة الأمامية دون تغيير.</p>
+</div>
+
+<% if (error) { %>
+  <div class="alert alert-danger mb-3"><%= error %></div>
+<% } %>
+
+<div class="settings-grid">
+  
+  <!-- Add Video Form -->
+  <div class="glass-panel">
+    <h3 class="section-title">إضافة فيديو جديد</h3>
+    
+    <form action="/admin/videos/add" method="POST">
+      <div class="mb-3">
+        <label for="title" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">عنوان الفيديو:</label>
+        <input type="text" id="title" name="title" required placeholder="مثال: الفيديو الثاني: قضية تقسيم العقار">
+      </div>
+
+      <div class="mb-3">
+        <label for="slug" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">الرابط التعريفي الفريد (Slug - بالإنجليزية):</label>
+        <input type="text" id="slug" name="slug" required placeholder="مثال: estate-division-case">
+        <small class="text-muted">سيصبح رابط الفيديو: /videos/estate-division-case</small>
+      </div>
+
+      <div class="mb-3">
+        <label for="source_type" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">نوع الاستضافة / المصدر:</label>
+        <select id="source_type" name="source_type">
+          <option value="youtube">يوتيوب (YouTube - فيديو غير مدرج)</option>
+          <option value="googledrive">جوجل درايف (Google Drive)</option>
+          <option value="cloudflare">كلاود فلير (Cloudflare Stream URL)</option>
+          <option value="gcs">تخزين جوجل السحابي (GCS Signed URL)</option>
+          <option value="local">رابط ملف محلي على السيرفر (Local MP4)</option>
+        </select>
+      </div>
+
+      <div class="mb-3">
+        <label for="source_url" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">رابط الفيديو (Source URL):</label>
+        <input type="text" id="source_url" name="source_url" required placeholder="رابط التضمين أو الرابط المباشر">
+        <small class="text-muted">لليوتيوب: استخدم رابط التضمين مثل: https://www.youtube.com/embed/XXXXX</small>
+      </div>
+
+      <div class="mb-3">
+        <label for="order_index" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">الترتيب في الصفحة الرئيسية:</label>
+        <input type="number" id="order_index" name="order_index" value="0" min="0">
+      </div>
+
+      <div class="mb-3">
+        <label for="description" class="text-secondary mb-1" style="display: block; font-size: 0.85rem; font-weight: 600;">وصف وتفاصيل الفيديو:</label>
+        <textarea id="description" name="description" rows="4" placeholder="اكتب تفاصيل وسياق الأحداث الموضحة بالفيديو..."></textarea>
+      </div>
+
+      <button type="submit" style="width: 100%;">نشر الفيديو وإرسال إشعار واتساب</button>
+    </form>
+  </div>
+
+  <!-- Video List -->
+  <div class="glass-panel">
+    <h3 class="section-title">الفيديوهات الحالية (<%= videos.length %>)</h3>
+    
+    <% if (videos && videos.length > 0) { %>
+      <div style="overflow-x: auto;">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>الترتيب</th>
+              <th>العنوان</th>
+              <th>النوع</th>
+              <th>الرابط</th>
+              <th>إجراءات</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% videos.forEach(video => { %>
+              <tr>
+                <td><%= video.order_index %></td>
+                <td>
+                  <strong><%= video.title %></strong><br>
+                  <small class="text-muted">/<%= video.slug %></small>
+                </td>
+                <td>
+                  <span class="badge-pending" style="background-color: rgba(212, 175, 55, 0.1); color: var(--accent-gold); border-color: rgba(212, 175, 55, 0.2);">
+                    <%= video.source_type %>
+                  </span>
+                </td>
+                <td style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                  <%= video.source_url %>
+                </td>
+                <td>
+                  <!-- Edit form toggler/handler (simplified by utilizing a small details update modal or expandable form, or page reload edit) -->
+                  <div style="display: flex; gap: 0.5rem; margin-top: 0.25rem;">
+                    <!-- Delete Button Form -->
+                    <form action="/admin/videos/delete/<%= video.id %>" method="POST" onsubmit="return confirm('هل أنت متأكد من حذف هذا الفيديو نهائياً؟ ستُحذف جميع التعليقات المرتبطة به كذلك.');">
+                      <button type="submit" class="btn-danger" style="padding: 0.35rem 0.6rem; font-size: 0.8rem;">حذف</button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+              <!-- Inline Quick Edit Row -->
+              <tr>
+                <td colspan="5" style="background-color: rgba(255,255,255,0.01); padding: 0.5rem 1rem;">
+                  <details style="width: 100%;">
+                    <summary style="cursor: pointer; font-size: 0.8rem; color: var(--accent-gold); outline: none;">⚙️ تعديل بيانات الفيديو</summary>
+                    <form action="/admin/videos/edit/<%= video.id %>" method="POST" style="margin-top: 0.75rem; display: grid; grid-template-columns: 1fr; gap: 0.75rem;">
+                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                        <div>
+                          <label style="font-size:0.75rem; color: var(--text-secondary);">العنوان:</label>
+                          <input type="text" name="title" value="<%= video.title %>" required>
+                        </div>
+                        <div>
+                          <label style="font-size:0.75rem; color: var(--text-secondary);">الرابط التعريفي:</label>
+                          <input type="text" name="slug" value="<%= video.slug %>" required>
+                        </div>
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+                        <div>
+                          <label style="font-size:0.75rem; color: var(--text-secondary);">النوع:</label>
+                          <select name="source_type">
+                            <option value="youtube" <%= video.source_type === 'youtube' ? 'selected' : '' %>>يوتيوب</option>
+                            <option value="googledrive" <%= video.source_type === 'googledrive' ? 'selected' : '' %>>جوجل درايف</option>
+                            <option value="cloudflare" <%= video.source_type === 'cloudflare' ? 'selected' : '' %>>كلاود فلير</option>
+                            <option value="gcs" <%= video.source_type === 'gcs' ? 'selected' : '' %>>تخزين جوجل السحابي</option>
+                            <option value="local" <%= video.source_type === 'local' ? 'selected' : '' %>>ملف محلي</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style="font-size:0.75rem; color: var(--text-secondary);">رابط المصدر:</label>
+                          <input type="text" name="source_url" value="<%= video.source_url %>" required>
+                        </div>
+                        <div>
+                          <label style="font-size:0.75rem; color: var(--text-secondary);">الترتيب:</label>
+                          <input type="number" name="order_index" value="<%= video.order_index %>" min="0">
+                        </div>
+                      </div>
+                      <div>
+                        <label style="font-size:0.75rem; color: var(--text-secondary);">الوصف:</label>
+                        <textarea name="description" rows="2"><%= video.description %></textarea>
+                      </div>
+                      <div style="text-align: left;">
+                        <button type="submit" style="padding: 0.4rem 1rem; font-size: 0.85rem;">حفظ التغييرات</button>
+                      </div>
+                    </form>
+                  </details>
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    <% } else { %>
+      <p class="text-muted text-center py-4">لم يتم إضافة أي فيديو بعد.</p>
+    <% } %>
+  </div>
+
+</div>
+
+<%- include('../layouts/footer') %>
