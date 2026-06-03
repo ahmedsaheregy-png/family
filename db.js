@@ -62,10 +62,10 @@ function seedDefaultSettings() {
     changed = true;
   }
 
-  // 3. Admin User account setup
-  if (!data.settings.admin_username) {
-    const adminUser = process.env.ADMIN_USERNAME || 'admin';
-    const adminPass = process.env.ADMIN_PASSWORD || 'admin123';
+  // 3. Admin User account setup (always update)
+  {
+    const adminUser = process.env.ADMIN_USERNAME || '1234';
+    const adminPass = process.env.ADMIN_PASSWORD || '1234';
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(adminPass, salt);
     
